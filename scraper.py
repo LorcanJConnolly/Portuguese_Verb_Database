@@ -16,6 +16,6 @@ class scraper:
         except requests.exceptions.RequestException:
             print(f"Error obtaining response from {self.url}.")
             return None
-        return response is not None
+        soup = BeautifulSoup(response.content, "html.parser")
+        return soup is not None
     
-
