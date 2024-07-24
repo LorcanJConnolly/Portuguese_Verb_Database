@@ -9,8 +9,8 @@ class ScraperTest(unittest.TestCase):
 
     def test_extract_html(self):
         scraper_object1, scraper_object2 = scraper(url="123"), scraper(url="https://docs.scrapy.org/en/latest/_static/selectors-sample1.html")
-        self.assertFalse(scraper_object1.get_html())
-        self.assertTrue(scraper_object2.get_html())
+        self.assertIsNone(scraper_object1.get_html())
+        self.assertIsNotNone(scraper_object2.get_html())
 
 
 
