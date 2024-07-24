@@ -4,8 +4,8 @@
 
 class scraper:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, url) -> None:
+        self.url = url
 
     def get_html(self):
-        return True
+        return self.url is not None
