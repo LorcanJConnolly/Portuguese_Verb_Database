@@ -8,4 +8,4 @@ class scraper:
         pass
 
     def get_html(self):
-        return None
+        return True
