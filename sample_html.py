@@ -1,47 +1,46 @@
 # Sample html scenarios used for testing.
 
-html_dict = {}
-
-html_tense = """
-<div id="ch_divSimple" class="word-wrap-simple">
-    <div class="result-block-api">
-        <div class="word-wrap-row">
-            <div class="word-wrap-title">
-                <h4>Indicativo</h4>
-            </div>
-                <div class="wrap-three-col">
-                    <div class="blue-box-wrap" mobile-title="Indicativo Presente">
+html_dict = {
+"html_tense": """
+    <div id="ch_divSimple" class="word-wrap-simple">
+        <div class="result-block-api">
+            <div class="word-wrap-row">
+                <div class="word-wrap-title">
+                    <h4>Indicativo</h4>
                 </div>
+                    <div class="wrap-three-col">
+                        <div class="blue-box-wrap" mobile-title="Indicativo Presente">
+                    </div>
+            </div>
         </div>
     </div>
-</div>
-"""
-html_tense_pronoun_conjugation = """
-<div id="ch_divSimple" class="word-wrap-simple">
-    <div class="result-block-api">
-        <div class="word-wrap-row">
-            <div class="word-wrap-title">
-                <h4>Indicativo</h4>
-            </div>
-                <div class="wrap-three-col">
-                    <div class="blue-box-wrap" mobile-title="Indicativo Presente">
-                        <p>Presente</p>
-                        <ul class="wrap-verbs-listing">
-                            <li>
-                                <i class="graytxt">eu</i>
-                                <i h="1">
-                                    <i class="verbtxt">t</i>
-                                    <i class="verbtxt-term-irr">enho</i>
-                                </i>
-                            </li>
-                         </ul>
-                    </div>
-                </div> 
+""",
+"html_tense_pronoun_conjugation" : """
+    <div id="ch_divSimple" class="word-wrap-simple">
+        <div class="result-block-api">
+            <div class="word-wrap-row">
+                <div class="word-wrap-title">
+                    <h4>Indicativo</h4>
+                </div>
+                    <div class="wrap-three-col">
+                        <div class="blue-box-wrap" mobile-title="Indicativo Presente">
+                            <p>Presente</p>
+                            <ul class="wrap-verbs-listing">
+                                <li>
+                                    <i class="graytxt">eu</i>
+                                    <i h="1">
+                                        <i class="verbtxt">t</i>
+                                        <i class="verbtxt-term-irr">enho</i>
+                                    </i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> 
+            </div> 
         </div> 
     </div> 
-</div> 
-"""
-html_tense_aux_pronoun_conjugation = """ 
+""",
+"html_tense_aux_pronoun_conjugation" : """ 
 <div class="blue-box-wrap" mobile-title="Indicativo Pretérito Perfeito Composto">
     <p>Pretérito Perfeito Composto</p>
     <ul class="wrap-verbs-listing">
@@ -55,9 +54,8 @@ html_tense_aux_pronoun_conjugation = """
         </li>
     </ul>
 </div> 
-"""
-
-html_wrong_class = """
+""",
+"html_wrong_class" : """
 <div id="ch_divSimple" class="word-wrap-simple">
     <div class="result-block-api">
         <div class="word-wrap-row">
@@ -70,9 +68,8 @@ html_wrong_class = """
         </div>
     </div>
 </div>
-"""
-
-html_multiple_tags = """
+""",
+"html_multiple_tags": """
 <div class="wrap-three-col">
     <div class="blue-box-wrap" mobile-title="Condicional Futuro do Pretérito Simples">
         <p>Futuro do Pretérito Simples</p>
@@ -122,8 +119,8 @@ html_multiple_tags = """
         </ul>
     </div>
 </div>
-"""
-html_multiple_tags_tense_only = """
+""",
+"html_multiple_tags_tense_only": """
 <div class="blue-box-wrap" mobile-title="Gerúndio">
     <ul class="wrap-verbs-listing top2">
         <li>
@@ -144,9 +141,8 @@ html_multiple_tags_tense_only = """
         </li>
     </ul>
 </div>
-"""
-
-html_multiple_tags_missing_tense = """
+""",
+"html_multiple_tags_missing_tense": """
 <div class="wrap-three-col">
     <div class="blue-box-wrap" mobile-title="Condicional Futuro do Pretérito Simples">
         <p>Futuro do Pretérito Simples</p>
@@ -197,5 +193,6 @@ html_multiple_tags_missing_tense = """
     </div>
 </div>
 """
+}
 
 
