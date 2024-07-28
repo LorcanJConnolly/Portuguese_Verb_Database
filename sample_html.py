@@ -144,7 +144,7 @@ html_dict = {
 """,
 "html_multiple_tags_missing_tense": """
 <div class="wrap-three-col">
-    <div class="blue-box-wrap" mobile-title="Condicional Futuro do Pretérito Simples">
+    <div class="blue-box-wrap">
         <p>Futuro do Pretérito Simples</p>
         <ul class="wrap-verbs-listing">
             <li>
