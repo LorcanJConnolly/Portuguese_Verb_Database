@@ -15,6 +15,7 @@ class scraper:
             'Accept':'text/html,application/xhtml+xml,application/xml;'
             'q=0.9,image/webp,*/*;q=0.8'
             }
+        self.verb = None
 
     def get_html(self):
         """
@@ -25,47 +26,55 @@ class scraper:
             return None
         return BeautifulSoup(response.content, "html.parser")
     
-    def extract_text_from_html_tags(self):
+    def extract_text_from_tags(self, bs):
         """
         """
-        bs = self.get_html()
+        # FIXME: Traverse tag trees to ensure order of insetion into text.
         if not bs:
-            return f"Error obtaining response from {self.url}."
-
-        # verbtxt_tags = bs.find_all('i', class_='verbtxt')
-        # verbtxt_term_irr_tags = bs.find_all('i', class_='verbtxt-term')
-        # verbtxt_term_irr_tags + bs.find_all('i', class_='verbtxt-term-irr')
+            raise ValueError(f"Error obtaining response from {self.url}.")
+        
         # ----- Reverso HTML Exactraction -----
+        # Add the root verb layer to the dictionary and its key.
         text = {}
+        whie_text = {}
         tense = None
+        pronoun = None
         word_constructor = None
         for element in bs.descendants:
+            """ HTML tags can get accessed like a dictionary. """ 
             if element.name:   # All HTML tags have name attributes.
-                if element.get('mobile-title', []):
-                    tense = element['mobile-title']
-                    text[tense] = {}
+                if "blue-box-wrap" in element.get('class', []) and element.get('mobile-tile', []) is not None:
+                    tense = element["mobile-title"]
+                    text[tense] = []
+                if 'graytxt' in element.get('class', []):
+                    pronoun = element.get_text()
+                if 'auxgraytxt' in element.get('class', []):
+                    pronoun += " " + element.get_text()
                 if 'verbtxt' in element.get('class', []):
                     word_constructor = element.get_text()
+                """ Attempt to insert text. """
                 if 'verbtxt-term' in element.get('class', []):
                     word_constructor += element.get_text()
-                    text[tense][word_constructor] = False
-                    word_constructor = None
+                    try:
+                        text[tense].append((pronoun, word_constructor, False))
+                    except KeyError:
+                        return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
+                    word_constructor, pronoun = None, None
                 if 'verbtxt-term-irr' in element.get('class', []):
                     word_constructor += element.get_text()
-                    text[tense][word_constructor] = True
-                    word_constructor = None
-                
-        for tense, words in text.items():
-            print(f"Tense: {tense}")
-            for word, value in words.items():
-                print(f"  Word: {word} : {value}")
-            print()  # Print a newline for better readability
-
-
-    def store_conjugations(self):
-        pass            
+                    try:
+                        text[tense].append((pronoun, word_constructor, True))
+                    except KeyError:
+                        return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
+                    word_constructor, pronoun = None, None
+        return text
     
+    def parse(self):
+        bs = self.get_html()
+        return self.extract_text_from_tags(bs)
+        
 
-x = scraper("https://conjugator.reverso.net/conjugation-portuguese-verb-poder.html")
-print(x.extract_text_from_html_tags())
+
+# x = scraper("https://conjugator.reverso.net/conjugation-portuguese-verb-poder.html")
+
 
