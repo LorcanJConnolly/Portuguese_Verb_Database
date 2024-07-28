@@ -27,7 +27,7 @@ class TestHtmlExtraction(unittest.TestCase):
             missing_url.parse()
         
 class TestTextExtractionFromTags(unittest.TestCase):
-    # FIXME: tests
+    # FIXME: Test documentation.
     def setUp(self) -> None:
         """Verb used for testing is ter."""
         self.obj = scraper("")
@@ -62,11 +62,15 @@ class TestTextExtractionFromTags(unittest.TestCase):
          soup = BeautifulSoup(html_dict["html_multiple_tags_tense_only"], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'Gerúndio': [(None, 'tendo', False)], 'Particípio': [(None, 'tido', False)]})
 
-    # def test_multiple_tags_tense_missing_extraction(self):
-    #      """ """
-    #      self.assertEqual(html_dict["html_multiple_tags_missing_tense"], {'Gerúndio': [(None, 'tendo', False)], 'Particípio': [(None, 'tido', False)]})
+    def test_multiple_tags_tense_missing_extraction(self):
+         """ """
+         soup = BeautifulSoup(html_dict["html_multiple_tags_missing_tense"], 'html.parser')
+         with self.assertRaises(KeyError):
+             self.obj.extract_text_from_tags(soup)
 
+class TestDatabaseStorage(unittest.TestCase):
     # 119 + 21
+    pass
 
 
 if __name__ == '__main__':
