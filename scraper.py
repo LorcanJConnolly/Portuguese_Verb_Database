@@ -5,7 +5,7 @@
 from bs4 import BeautifulSoup
 import requests
 
-class scraper:
+class Scraper:
 
     def __init__(self, url) -> None:
         self.url = url
