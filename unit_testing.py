@@ -2,7 +2,7 @@ import unittest
 from bs4 import BeautifulSoup
 from scraper import Scraper
 from sample_html import html_dict
-import db_populator
+from db_populator import Database
 import MySQL_connection
 
 class TestHtmlExtraction(unittest.TestCase):
@@ -115,13 +115,20 @@ class TestDatabaseStorage(unittest.TestCase):
             "user":"not_user", 
             "password":"wrong_password"
             }
-        with self.assertRaises(ValueError):
-            self.connection = MySQL_connection.connect_to_mysql_server(connection_args)
-         
+        self.connection = MySQL_connection.connect_to_mysql_server(connection_args)
+        self.assertIsNone(self.connection)
+        
+    def test_existence_of_database_check(self):
+        """ Tests if the check for whether a database exists or not. """
+        obj = Database(connection="", data="", create_new_db=True)
+        self.assertTrue(obj.populate_db())
+
+
     def tearDown(self):
         if self.connection and self.connection.is_connected():
             self.connection.close()
-            print("Connection closed.")
+            print("\nConnection closed.")
+
 
     
     # 119 + 21
