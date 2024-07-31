@@ -47,7 +47,7 @@ class Scraper:
             """ HTML tags can get accessed like a dictionary. """ 
             if element.name:   # All HTML tags have name attributes.
                 if "blue-box-wrap" in element.get('class', []) and element.get('mobile-tile', []) is not None:
-                    tense = element["mobile-title"]
+                    tense = element["mobile-title"].strip()
                     verb_dataset[tense] = []
                 if 'graytxt' in element.get('class', []):
                     pronoun = element.get_text()
@@ -78,15 +78,35 @@ class Scraper:
         
 
 
-# x = Scraper("https://conjugator.reverso.net/conjugation-portuguese-verb-poder.html", verb="poder", global_dataset={})
-# # print(x.parse())
 
+# o = []
 # y = x.parse()
 # for v in y:
 #     print(v)
 #     for t in y[v]:
 #         print(t)
 #         for word in y[v][t]:
-#             print(word)
+#             o.append(word[0])
+#         print(o)
+#         o = []
 
 
+# html = """
+#     <div id="ch_divSimple" class="word-wrap-simple">
+#         <div class="result-block-api">
+#             <div class="word-wrap-row">
+#                 <div class="word-wrap-title">
+#                     <h4>Indicativo</h4>
+#                 </div>
+#                     <div class="wrap-three-col">
+#                         <div class="blue-box-wrap" mobile-title="Indicativo Presente">
+#                     </div>
+#             </div>
+#         </div>
+#     </div>
+# """
+# bs = BeautifulSoup(html, "html.parser")
+# z = Scraper(url="", verb="ter", global_dataset={})
+# print(z.extract_text_from_tags(bs))
+
+     
