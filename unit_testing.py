@@ -61,6 +61,7 @@ class TestHtmlExtraction(unittest.TestCase):
         """
         error_codes = [500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
         for error_code in error_codes:
+            print(error_code)
             url = f'https://httpbin.org/status/{error_code}'
             self.assertIsNone(self.obj.get_html(url))
         
@@ -138,9 +139,6 @@ class TestDatabaseConnection(unittest.TestCase):
         self.connection = MySQL_connection.connect_to_mysql_server(connection_args)
         self.assertIsNone(self.connection)
         
-
-   
-
 class TestDatabaseStorage(unittest.TestCase):
     def setUp(self):
         self.connection = MySQL_connection.connect_to_mysql_server()
@@ -151,7 +149,7 @@ class TestDatabaseStorage(unittest.TestCase):
         databases = [database[0] for database in self.cursor.fetchall()]
         if self.test_db_name in databases:
             raise Exception(f"ERROR: Database '{self.test_db_name}' already exists. Aborting tests to prevent accidental data loss.")
-        self.obj = Database(connection=self.connection, data="", create_new_db=True)
+        self.obj = Database(connection=self.connection, dataset="", create_new_db=True)
         self.obj.create_db(db_name=self.test_db_name)
    
     def tearDown(self):
@@ -188,7 +186,7 @@ class TestDatabaseStorage(unittest.TestCase):
     def test_single_row_insertion(self):
         """ A test to see if data is correctly accepted and stored in the appropriate tables. """
         dataset = dataset_dict["single_verb"]
-        self.obj.data = dataset
+        self.obj.dataset = dataset
         # print(self.obj.data)
         self.obj.store_row(data=self.obj.data)
         # TODO: populate these tables.
