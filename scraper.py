@@ -9,7 +9,7 @@ class Scraper:
 
     def __init__(self, url, verb, global_dataset) -> None:
         self.url = url
-        self.headers = headers = {
+        self.headers = {
             'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)'
             'AppleWebKit 537.36 (KHTML, like Gecko) Chrome',
             'Accept':'text/html,application/xhtml+xml,application/xml;'
@@ -18,13 +18,15 @@ class Scraper:
         self.verb_root = verb
         self.global_dataset = global_dataset
 
-    def get_html(self):
+    def get_html(self, url):
         """
+        Fetches the HTML content from the given URL and returns a BeautifulSoup object.
         """
         try:
-            response = requests.get(self.url, headers=self.headers)
-        except requests.exceptions.RequestException:
-            return None
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"ERROR GETTING RESPONSE FROM {url}\nERROR CODE: {e}")  
         return BeautifulSoup(response.content, "html.parser")
     
     def extract_text_from_tags(self, bs):
@@ -73,7 +75,7 @@ class Scraper:
         return self.global_dataset
     
     def parse(self):
-        bs = self.get_html()
+        bs = self.get_html(url=self.url)
         return self.extract_text_from_tags(bs)
         
 
