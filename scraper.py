@@ -26,19 +26,17 @@ class Scraper:
             response = requests.get(url, headers=self.headers)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            print(f"ERROR GETTING RESPONSE FROM {url}\nERROR CODE: {e}")  
+            print(f"ERROR GETTING RESPONSE\nERROR CODE: {e}")  
+            return None
         return BeautifulSoup(response.content, "html.parser")
     
     def extract_text_from_tags(self, bs):
         """
+        Extracts text from html tags of the fetched BeautifulSoup object and returns as a dataset.
         """
-        # FIXME: Traverse tag trees to ensure order of insetion into text.
         if not bs:
             raise ValueError(f"Error obtaining response from {self.url}.")
-        
-        # ----- Reverso HTML Exactraction -----
-        # Add the root verb layer to the dictionary and its key.
-        # Whatever the dataset was before, we add the self.verb to it.
+        """ Reverso HTML Exactraction. """
         verb_dataset = {}
         if self.verb_root not in self.global_dataset:
             self.global_dataset[self.verb_root] = verb_dataset
@@ -57,7 +55,7 @@ class Scraper:
                     pronoun += " " + element.get_text()
                 if 'verbtxt' in element.get('class', []):
                     word_constructor = element.get_text()
-                """ Attempt to insert text. """
+                """ Attempt to insert text in dataset. """
                 if 'verbtxt-term' in element.get('class', []):
                     word_constructor += element.get_text()
                     try:
@@ -111,4 +109,7 @@ class Scraper:
 # z = Scraper(url="", verb="ter", global_dataset={})
 # print(z.extract_text_from_tags(bs))
 
+x = Scraper(url="", verb="", global_dataset={})
+url = "https://httpbin.org/status/400"
+x.get_html(url)
      
