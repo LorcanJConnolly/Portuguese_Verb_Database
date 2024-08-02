@@ -64,6 +64,9 @@ class Database:
             # FIXME: can drop database because we check the user input db_name doesn't exist at input.
     
     def store_verb(self, verb):
+        """
+        Stores a new root verb into the Verb table to generate its key.
+        """
         self.cursor.execute(f"USE {self.db_name}")
         # Insert the root Verb into Verb table to generated a Primary Key.
         self.cursor.execute("INSERT IGNORE INTO Verb (Verb) VALUES (%s)", (verb,))
@@ -99,6 +102,9 @@ class Database:
         
 
     def populate_db(self, dataset):
+        """
+        Iterates over the dataset and compares the structure and data to the expected values using structure_dict from dataset_structure.
+        """
         if self.create_new_db:
             # TODO: Move this to input
             print("User wants to create new db.")

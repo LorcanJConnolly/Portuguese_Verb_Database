@@ -24,6 +24,3 @@ def connect_to_mysql_server(args=connection_args):
     connection.close()
     return "Error occured"
 
-# print(mydb) # <mysql.connector.connection_cext.CMySQLConnection object at 0x0000012BA05D1D60> PS C:\Users\lconn\Documents\Programming\Python\Python Projects\Portuguese_Verb_Database> 
-
-# print(connect_to_mysql_server())

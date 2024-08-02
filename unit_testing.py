@@ -9,8 +9,9 @@ import MySQL_connection
 from sample_dataset import dataset_dict
 
 class TestHtmlExtraction(unittest.TestCase):
-    # FIXME: testing for different status codes using: https://httpbin.org
-
+    """
+    Tests relating to the html extraction in Sraper.get_html.
+    """
     def setUp(self) -> None:
         """
         Initialise Scraper object for each test.
@@ -52,7 +53,7 @@ class TestHtmlExtraction(unittest.TestCase):
         """
         error_codes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428, 429, 431, 451]
         for error_code in error_codes:
-            url = f'https://httpbin.org/status/{error_code}'
+            url = f"https://httpbin.org/status/{error_code}"
             self.assertIsNone(self.obj.get_html(url))
 
     def test_response_error_5XX(self):
@@ -62,65 +63,95 @@ class TestHtmlExtraction(unittest.TestCase):
         error_codes = [500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
         for error_code in error_codes:
             print(error_code)
-            url = f'https://httpbin.org/status/{error_code}'
+            url = f"https://httpbin.org/status/{error_code}"
             self.assertIsNone(self.obj.get_html(url))
         
 class TestTextExtractionFromTags(unittest.TestCase):
+    """
+    Test relating to text extraction from fetched html using Scraper.extract_text_from_tags.
+    """
     # FIXME: Test documentation.
     # FIXME: Add verb layer.
     def setUp(self) -> None:
-        """Verb used for testing is ter."""
-        self.obj = Scraper("", verb="ter", global_dataset={})
+        """
+        The Verb used for testing is ter.
+        """
+        self.obj = Scraper("", verb='ter', global_dataset={})
     
     def test_tense_only_extraction(self):
-        """Test for extracting the tense from a tag."""
-        soup = BeautifulSoup(html_dict["html_tense"], 'html.parser')
+        """
+        Test for extracting the Tense from a tag.
+        """
+        soup = BeautifulSoup(html_dict['html_tense'], 'html.parser')
         # self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{'Indicativo Presente': []}})
         self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter': {'Indicativo Presente': []}})
 
     def test_tense_pronoun_conjugation_extraction(self):
-         """ """
-         soup = BeautifulSoup(html_dict["html_tense_pronoun_conjugation"], 'html.parser')
+         """ 
+         Test for extracting the Tense, Pronoun, Conjugation, and Iregular value from a tag.
+         """
+         soup = BeautifulSoup(html_dict['html_tense_pronoun_conjugation'], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{'Indicativo Presente': [('eu', 'tenho', True)]}})
 
     def test_tense_aux_pronoun_conjugation_extraction(self):
-         """ """
+         """ 
+         Test for extracting the Tense, Auxiliary Proun + Pronoun, Conjugation, and Iregular value from a tag.
+         """
          soup = BeautifulSoup(html_dict["html_tense_aux_pronoun_conjugation"], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{'Indicativo Pretérito Perfeito Composto': [('eu tenho', 'tido', False)]}})
 
     def test_wrong_class(self):
-         """ """
+         """ 
+         Test for no extraction from wrong tags.
+         """
          soup = BeautifulSoup(html_dict["html_wrong_class"], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{}})
 
     def test_multiple_tags_extraction(self):
-         """ """
+         """ 
+         Test for extracting the Tense, Auxiliary Proun + Pronoun, Conjugation, and Iregular value from multiple tags.
+         """
          soup = BeautifulSoup(html_dict["html_multiple_tags"], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{'Condicional Futuro do Pretérito Simples': [('eu', 'teria', False), ('tu', 'terias', False), ('ele/ela/você', 'teria', False), ('nós', 'teríamos', False), ('vós', 'teríeis', False), ('eles/elas/vocês', 'teriam', False)]}})
     
     def test_multiple_tags_tense_only_extraction(self):
-         """ """
+         """ 
+         Test for case of extracting from multiple tags contains on a Tense.
+         """
          soup = BeautifulSoup(html_dict["html_multiple_tags_tense_only"], 'html.parser')
          self.assertEqual(self.obj.extract_text_from_tags(soup), {'ter':{'Gerúndio': [(None, 'tendo', False)], 'Particípio': [(None, 'tido', False)]}})
 
     def test_multiple_tags_tense_missing_extraction(self):
-         """ """
+         """ 
+          Test for no extraction from many wrong tags.
+         """
          soup = BeautifulSoup(html_dict["html_multiple_tags_missing_tense"], 'html.parser')
          with self.assertRaises(KeyError):
              self.obj.extract_text_from_tags(soup)
 
 class TestDatabaseConnection(unittest.TestCase):
+    """
+    Test to see if connection is formed to MySQL server using MySQL_connection.connect_to_mysql_server
+    """
     def setUp(self):
+        """
+        Open a connection.
+        """
         self.connection = None
         self.test_db_name = "test_db_populator_create_db"
         self.created_test_db = False
 
     def tearDown(self):
+        """
+        Close the connection.
+        """
         if self.connection and self.connection.is_connected():
             self.connection.close()
 
     def test_server_connection_success(self):
-        """ Tests if correct log-in results in a successful conneciton to the MySQL server. """
+        """ 
+        Tests if correct log-in results in a successful conneciton to the MySQL server. 
+        """
         connection_args = {
             "host":"localhost", 
             "user":"python_pt", 
@@ -130,7 +161,9 @@ class TestDatabaseConnection(unittest.TestCase):
         self.assertIsNotNone(self.connection)
 
     def test_server_connection_failure(self):
-        """ Tests if incorrect log-in results in a successful conneciton to the MySQL server. """
+        """ 
+        Tests if incorrect log-in results in a successful conneciton to the MySQL server. 
+        """
         connection_args = {
             "host":"localhost", 
             "user":"not_user", 
@@ -140,7 +173,13 @@ class TestDatabaseConnection(unittest.TestCase):
         self.assertIsNone(self.connection)
         
 class TestDatabaseStorage(unittest.TestCase):
+    """
+    Test for storage in the chosen MySQL database using dp_populator.populate_db.
+    """
     def setUp(self):
+        """
+        Create a test database that does not share a name with an already existing database.
+        """
         self.connection = MySQL_connection.connect_to_mysql_server()
         self.cursor = self.connection.cursor()
         self.test_db_name = "test_db_populator_create_db"
@@ -153,25 +192,28 @@ class TestDatabaseStorage(unittest.TestCase):
         self.obj.create_db(db_name=self.test_db_name)
    
     def tearDown(self):
+        """
+        Delete the test database.
+        """
         self.cursor.execute(f"DROP DATABASE IF EXISTS {self.test_db_name}")
         self.cursor.close()
         self.connection.close()
 
     def test_database_created(self):
-        pass
-        # FIXME: if this test fails, final code not ran.
-        """ Tests if database is created """
+        """ 
+        Tests if database is created 
+        """
         self.cursor.execute("SHOW DATABASES")
         databases = [database[0] for database in self.cursor.fetchall()]
         self.assertIn(self.test_db_name, databases)
 
     def test_database_populated(self):
-        """ Tests if database is created and populated with tables. """
+        """ 
+        Tests if database is created and populated with tables. 
+        """
         self.cursor.execute(f"USE {self.test_db_name}")
         self.cursor.execute("SHOW TABLES")
         tables = [table[0] for table in self.cursor.fetchall()]
-        # TODO: populate these tables.
-        # TODO: test populate these tables.
         self.assertIn("verb", tables)
         self.assertIn("pronoun", tables)
         self.assertIn("tense", tables)
@@ -179,12 +221,17 @@ class TestDatabaseStorage(unittest.TestCase):
         #TODO: Test tables are populated
     
     def test_database_idtables_populated(self):
-        """ Tests if database is created and ID tables are populated. """
+        """
+        Tests if database is created and ID tables are populated.
+        """
+        # TODO
         pass
 
     
     def test_single_row_insertion(self):
-        """ A test to see if data is correctly accepted and stored in the appropriate tables. """
+        """
+        A test to see if data is correctly accepted and stored in the appropriate tables. 
+        """
         dataset = dataset_dict["single_verb"]
         self.obj.dataset = dataset
         # print(self.obj.data)
@@ -196,12 +243,7 @@ class TestDatabaseStorage(unittest.TestCase):
         self.cursor.execute("SELECT * FROM conjugation")
         rows = [row for row in self.cursor.fetchall()]
         print("rows: ", rows)
-        
-        
-
-# 119 + 21
 
 if __name__ == '__main__':
     unittest.main()
 
-# for database we may use 'test fixture'

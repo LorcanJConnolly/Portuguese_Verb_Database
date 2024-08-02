@@ -1,4 +1,4 @@
-# A sample database for testing.
+""" A sample database for testing. """
 
 dataset_dict = {
     "single_verb": {'verb': {'tense1': [('pronoun', 'conjugation', True)]}},
