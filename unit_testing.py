@@ -8,6 +8,9 @@ from db_populator import Database
 import MySQL_connection
 from sample_dataset import dataset_dict
 
+# FIXME: create_db moved to create_db.py
+# TODO: Test that create_db error raised actually drops the database.
+
 class TestHtmlExtraction(unittest.TestCase):
     """
     Tests relating to the html extraction in Sraper.get_html.
