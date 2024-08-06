@@ -52,9 +52,9 @@ def create_db(self, db_name, connection):
                     for pronoun in pronouns:
                         self.cursor.execute("INSERT IGNORE INTO Pronoun (Pronoun) VALUES (%s)", (pronoun,))   # Ignore duplicates.
                         self.connection.commit()
-                        
+
+
         except mysql.connector.Error as error:
             print(f"ERROR CREATING DATABASE\nDEBUG INFO\nError number: {error.errno}\nError message: {error.msg}")
             self.cursor.execute(f"DROP DATABASE {db_name}")
-            # FIXME: can drop database because we check the user input db_name doesn't exist at input.
     
