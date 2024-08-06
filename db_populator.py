@@ -1,15 +1,15 @@
-""" Enter this module if MySQL server conneciton made """
+""" Inserts a verb dataset into the database. Can also initialise the databse if required. """
 import mysql.connector
 import MySQL_connection
 from scraper import Scraper
 from dataset_structure import structure_dict
 
 class Database:
-    def __init__(self, connection, db_name=None, create_new_db=True) -> None:
+    def __init__(self, connection, verb, db_name) -> None:
         self.connection = connection
         self.cursor = self.connection.cursor()
+        self.verb = verb
         self.db_name = db_name
-        self.create_new_db = create_new_db
 
     def create_db(self, db_name):
         """ 
@@ -82,7 +82,7 @@ class Database:
         self.cursor.execute("SELECT id FROM Verb WHERE Verb = %s", (verb,))
         verb_id = self.cursor.fetchone()
         if verb_id is None:
-            raise ValueError(f"Pronoun '{verb}' does not exist in the Pronoun table")
+            raise ValueError(f"Verb '{verb}' does not exist in the Pronoun table")
         verb_id = verb_id[0]
 
         self.cursor.execute("SELECT id FROM Pronoun WHERE Pronoun = %s", (pronoun,))
@@ -100,51 +100,36 @@ class Database:
         self.cursor.execute("INSERT INTO Conjugation (Verb, Tense, Pronoun, Conjugation, Irregular) VALUES (%s, %s, %s, %s, %s)", (verb_id, tense_id, pronoun_id, conjugation, irregular))
         self.connection.commit()
         
-
-    def populate_db(self, dataset):
+    def populate_db(self, dataset, verb):
         """
         Iterates over the dataset and compares the structure and data to the expected values using structure_dict from dataset_structure.
         """
-        if self.create_new_db:
-            # TODO: Move this to input
-            print("User wants to create new db.")
-            self.db_name = str(input("Enter the name of the database to create: "))
-            self.create_db(self.db_name)
-            print("Database created")
-
         errors = {}   # Dictionary contains {Verb that triggered error : Error reason}.
-        for verb in dataset:
-            error_occured = False
+        # TODO: test the new added error raising
+        # TODO: test that this inputs a single verb correctly
+        try:
             for tense in dataset[verb]:
                 if tense not in structure_dict:
                     errors[verb] = f"ERROR: Extracted tense: {tense} is not recognised."
-                    error_occured = True
-                    break
+                    raise ValueError
                 expected_pronouns = structure_dict[tense]
                 for values, expected_pronoun in zip(dataset[verb][tense], expected_pronouns):
                     if len(values) != 3:
                         errors[verb] = f"ERROR: {values} does not contain a pronoun, comjugation, and iregular type."
-                        error_occured = True
-                        break
+                        raise ValueError
                     pronoun, conjugation, irregular = values
                     if pronoun is None: pronoun = "NULL"
                     if len(dataset[verb][tense]) != len(expected_pronouns):
                         errors[verb] = f"ERROR: expected {len(expected_pronouns)} pronouns: {expected_pronouns} in tesnse: {tense} but only got {len(dataset[verb][tense])} in {dataset[verb][tense]}"
-                        error_occured = True
-                        break
+                        raise ValueError
                     if expected_pronoun != pronoun:
                         errors[verb] = f"ERROR: expected pronoun '{expected_pronoun}' != given pronoun '{pronoun}' in tesnse: {tense}."
-                        error_occured = True
-                        break
+                        raise ValueError
                     else:
-                        # TODO: check if verb is duplicate
                         self.store_verb(verb)
                         self.store_row(verb, tense, pronoun, conjugation, irregular)
-                if error_occured:
-                    break
-            if error_occured:
-                """ Skip the entire verb dataset for a verb that raises an error. """
-                continue
-        if errors:
-            print(f"The following verbs were extracted incorrectly and could not be stored in the databse: \n{errors}")
+        except Exception as e:
+            print("Errors:", errors)
+            print("Exception:", str(e))
+            
     
