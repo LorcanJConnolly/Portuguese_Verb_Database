@@ -21,9 +21,10 @@ def input_type(input):
     if os.path.isfile(input) and os.path.splitext(input)[1] == ".xlsx" or os.path.splitext(input)[1] == ".xls":
         excel_to_list.extract()
     else:
-        return [verb.strip().strip(punctuation).lower() for verb in input.split()]
+        return input
+        #FIXME output cant be a list
+        # return [verb.strip().strip(punctuation).lower() for verb in input.split()]
 
-# FIXME: requires two inputs, how do we get this from args
 def validate_db_name(name, create_new_databse):
     """ Checks if given database name contains the correct characters for a MySQL database. """
     if re.match(r'^[A-Za-z0-9_]+$', name):
@@ -34,7 +35,6 @@ def validate_db_name(name, create_new_databse):
     else:
         raise argparse.ArgumentTypeError(f"Invalid database name '{name}'. Must contain only alphanumeric characters and underscores, with no spaces.")
 
-# FIXME: requires two inputs, how do we get this from args
 def is_unique_name(name, create_new_databse):
     """ 
     If creating a new database, checks if given database name already exists in the database. 
@@ -72,9 +72,9 @@ if __name__ == '__main__':
     """
     # python [file.py] [verbs] [database name] [create new database] // [JSON file name] [Create new JSON file]
     parser = argparse.ArgumentParser(description="Scrape verb webpage(s) and insert data into a MySQL database.")
-    parser.add_argument("verbs", type=input_type, help="Input the verb(s) with a whitespace delimiter or the directory of an excel file containing only a list of verbs.")   # args.verbs
+    parser.add_argument("verbs", type=input_type, nargs='+', help="Input the verb(s) with a whitespace delimiter or the directory of an excel file containing only a list of verbs.")   # args.verbs
     parser.add_argument("database_name", help="The name of the database to populate. Must exist in databse if create_database is set to 'N'.")
-    parser.add_argument("create_new_databse", choices=['Y', 'N'], help="Y/N.\n'Y': create a new database with the name: [database_name].\n'N': add to an existing database with the name: [database_name].")
+    parser.add_argument("create_new_databse", choices=['Y', 'N', 'y', 'n'], help="Y/N.\n'Y': create a new database with the name: [database_name].\n'N': add to an existing database with the name: [database_name].")
     args = parser.parse_args()
     
     try:
@@ -82,23 +82,25 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
 
-    # FIXME: args.create_new_databse.lower()
     connection = MySQL_connection.connect_to_mysql_server() 
+
     if args.create_new_databse.lower() == "y":
         create_db(args.database_name, connection)
     
     dataset = {}
-
+    print("args.verb: ", args.verbs)
     for verb in args.verbs: 
-        if not exist_in_database(connection, verb):
+        print("verb: ", verb)
+        if not exist_in_database(connection, verb, args.database_name):
             print("Scraping the verb: ", verb)
             url = f"https://conjugator.reverso.net/conjugation-portuguese-verb-{verb}.html"
             time.sleep(random.uniform(10, 20))
             scraper = Scraper(url=url, verb=verb, global_dataset=dataset)
-            # Insert the verb into database
-            populator = Database(connection=connection, db_name=args.database_name, verb=verb)
-            populator.populate_db(dataset, verb)
             dataset = scraper.parse()
+            print("Scraping complete.")
+            # Insert the verb into database
+            populator = Database(connection=connection, db_name=args.database_name, verb=verb, global_dataset=dataset)
+            populator.populate_db(dataset, verb)
         else:
             print(f"Skpping the verb: '{verb}' as it already exists in the database.")
 
