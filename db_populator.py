@@ -59,25 +59,24 @@ class Database:
             for tense in dataset[verb]:
                 if tense not in structure_dict:
                     errors[verb] = f"ERROR: Extracted tense: {tense} is not recognised."
-                    raise ValueError
+                    raise ValueError("Errors whilst inserting into database:", errors)
                 expected_pronouns = structure_dict[tense]
                 for values, expected_pronoun in zip(dataset[verb][tense], expected_pronouns):
                     if len(values) != 3:
                         errors[verb] = f"ERROR: {values} does not contain a pronoun, comjugation, and iregular type."
-                        raise ValueError
+                        raise ValueError("Errors whilst inserting into database:", errors)
                     pronoun, conjugation, irregular = values
                     if pronoun is None: pronoun = "NULL"
                     if len(dataset[verb][tense]) != len(expected_pronouns):
                         errors[verb] = f"ERROR: expected {len(expected_pronouns)} pronouns: {expected_pronouns} in tesnse: {tense} but only got {len(dataset[verb][tense])} in {dataset[verb][tense]}"
-                        raise ValueError
+                        raise ValueError("Errors whilst inserting into database:", errors)
                     if expected_pronoun != pronoun:
                         errors[verb] = f"ERROR: expected pronoun '{expected_pronoun}' != given pronoun '{pronoun}' in tesnse: {tense}."
-                        raise ValueError
+                        raise ValueError("Errors whilst inserting into database:", errors)
                     else:
                         self.store_verb(verb)
                         self.store_row(verb, tense, pronoun, conjugation, irregular)
         except Exception as e:
-            print("Errors:", errors)
             print("Exception:", str(e))
             
     
