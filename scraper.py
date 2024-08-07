@@ -1,12 +1,11 @@
-# Interacts with https://conjugator.reverso.net/conjugation-portuguese.html
-# I: A verb or container of verbs.
-# O: The verb conjugations.
-
 from bs4 import BeautifulSoup
 import requests
 
 class Scraper:
-
+    """
+    Scrapes text from requested HTML tags from https://conjugator.reverso.net/conjugation-portuguese-verb-{input_verb}.html and ammends the 
+    data to the global dictionary containing all of the datasets of the scraped text from each url.
+    """
     def __init__(self, url, verb, global_dataset) -> None:
         self.url = url
         self.headers = {
