@@ -5,33 +5,23 @@ from scraper import Scraper
 from db_populator import Database
 from create_db import create_db
 import MySQL_connection
+import excel_to_list
 
-"""Create a delay between requests."""
 import time
 import random
 
 import argparse
 import os
 import re
+from string import punctuation
 
-"""
-self.connection = MySQL_connection.connect_to_mysql_server()
-        self.cursor = self.connection.cursor()
-        self.test_db_name = "test_db_populator_create_db"
-    
-        self.cursor.execute("SHOW DATABASES")
-        databases = [database[0] for database in self.cursor.fetchall()]
-        if self.test_db_name in databases:
-            raise Exception(f"ERROR: Database '{self.test_db_name}' already exists. Aborting tests to prevent accidental data loss.")
-"""
+# TODO: Add a way of removing a verb and its data from the database incase of wrong entry.
 
 def input_type(input):
     if os.path.isfile(input) and os.path.splitext(input)[1] == ".xlsx" or os.path.splitext(input)[1] == ".xls":
-        # extract from excel.
-        # return verbs
-        pass
+        excel_to_list.extract()
     else:
-        return [verb.strip() for verb in input.split()]
+        return [verb.strip().strip(punctuation).lower() for verb in input.split()]
 
 # FIXME: requires two inputs, how do we get this from args
 def validate_db_name(name, create_new_databse):
@@ -42,7 +32,7 @@ def validate_db_name(name, create_new_databse):
         else:
             raise ValueError(is_unique_name(name, create_new_databse))
     else:
-        raise argparse.ArgumentTypeError("Invalid database name. Must contain only alphanumeric characters and underscores, with no spaces.")
+        raise argparse.ArgumentTypeError(f"Invalid database name '{name}'. Must contain only alphanumeric characters and underscores, with no spaces.")
 
 # FIXME: requires two inputs, how do we get this from args
 def is_unique_name(name, create_new_databse):
@@ -57,15 +47,15 @@ def is_unique_name(name, create_new_databse):
     cursor.close()
     connection.close()
     if name in databases and create_new_databse == "Y":
-        return f"Database name: '{name}' already exists in the database. Please choose another name."
+        raise ValueError(f"Database name: '{name}' already exists in the database. Please choose another name.")
     if name not in databases and create_new_databse == "N":
-        return f"Database name: '{name}' does not exist in the database. Please choose another name from: {databases}."
+        raise ValueError(f"Database name: '{name}' does not exist in the database. Please choose another name from: {databases}.")
     return True
 
-def exist_in_database(connection, verb):
+def exist_in_database(connection, verb, db_name):
     """ Checks if a verb exists in the database already. """
     cursor = connection.cursor()
-    cursor.execute(f"USE {args.database_name}")
+    cursor.execute(f"USE {db_name}")
     cursor.execute("SELECT id FROM Verb WHERE Verb = %s", (verb,))
     verb_id = cursor.fetchone()
     cursor.close()
@@ -75,9 +65,10 @@ def exist_in_database(connection, verb):
         return True
 
 
+
 if __name__ == '__main__':
     """
-    
+    CLI inputs.
     """
     print(validate_db_name("test", "Y"))
     # python [file.py] [verbs] [database name] [create new database] // [JSON file name] [Create new JSON file]
