@@ -7,6 +7,7 @@ from db_populator import Database
 import MySQL_connection
 import create_db
 from sample_dataset import dataset_dict
+from dataset_structure import structure_dict
 import PT_Conjugation_Database
 import argparse
 
@@ -225,14 +226,32 @@ class TestDatabaseInteracitons(unittest.TestCase):
         self.assertIn("pronoun", tables)
         self.assertIn("tense", tables)
         self.assertIn("conjugation", tables)
-        #TODO: Test tables are populated
+
     
     def test_database_idtables_populated(self):
         """
-        Tests if database is created and ID tables are populated.
+        Tests if database is created and ID tables are populated as expected.
         """
-        # TODO
-        pass
+        self.cursor.execute(f"USE {self.test_db_name}")
+        self.cursor.execute(f"SELECT Pronoun FROM PRONOUN")
+        pronouns = [pronoun[0] for pronoun in self.cursor.fetchall() if pronoun[0] is not None]
+        expected_pronouns = ['eu', 'tu', 'ele/ela/você', 'nós', 'vós', 'eles/elas/vocês', 
+                             'eu tenho', 'tu tens', 'ele/ela/você tem', 'nós temos', 'vós tendes', 'eles/elas/vocês têm',
+                             'eu tinha', 'tu tinhas', 'ele/ela/você tinha', 'nós tínhamos', 'vós tínheis', 'eles/elas/vocês tinham',
+                             'eu tivera', 'tu tiveras', 'ele/ela/você tivera', 'nós tivéramos', 'vós tivéreis', 'eles/elas/vocês tiveram',
+                             'eu terei', 'tu terás', 'ele/ela/você terá', 'nós teremos', 'vós tereis', 'eles/elas/vocês terão',
+                             'eu tenha', 'tu tenhas', 'ele/ela/você tenha', 'nós tenhamos', 'vós tenhais', 'eles/elas/vocês tenham',
+                             'eu tivesse', 'tu tivesses', 'ele/ela/você tivesse', 'nós tivéssemos', 'vós tivésseis', 'eles/elas/vocês tivessem',
+                             'eu tiver', 'tu tiveres', 'ele/ela/você tiver', 'nós tivermos', 'vós tiverdes', 'eles/elas/vocês tiverem',
+                             'eu teria', 'tu terias', 'ele/ela/você teria', 'nós teríamos', 'vós teríeis', 'eles/elas/vocês teriam',
+                             'NULL']
+        self.assertEqual(sorted(pronouns), sorted(expected_pronouns))
+
+        self.cursor.execute(f"SELECT Tense FROM TENSE")
+        tenses = [tense[0] for tense in self.cursor.fetchall()]
+        expected_tensese = [tense for tense in structure_dict.keys()]
+        self.assertEqual(sorted(tenses), sorted(expected_tensese))
+        
     
     def test_create_db_is_unique_name(self):
          """
