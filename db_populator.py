@@ -5,10 +5,11 @@ from scraper import Scraper
 from dataset_structure import structure_dict
 
 class Database:
-    def __init__(self, connection, verb, db_name) -> None:
+    def __init__(self, connection, verb, global_dataset, db_name) -> None:
         self.connection = connection
         self.cursor = self.connection.cursor()
         self.verb = verb
+        self.global_dataset = global_dataset
         self.db_name = db_name
 
     def store_verb(self, verb):
@@ -76,7 +77,7 @@ class Database:
                     else:
                         self.store_verb(verb)
                         self.store_row(verb, tense, pronoun, conjugation, irregular)
-        except Exception as e:
-            print("Exception:", str(e))
+        except ValueError as ve:
+            print("Exception:", str(ve))
             
     
