@@ -44,33 +44,44 @@ class Scraper:
         word_constructor = None
         for element in bs.descendants:
             """ HTML tags can get accessed like a dictionary. """ 
-            if element.name:   # All HTML tags have name attributes.
-                if "blue-box-wrap" in element.get('class', []) and element.get('mobile-tile', []) is not None:
-                    tense = element["mobile-title"].strip()
-                    verb_dataset[tense] = []
-                if 'graytxt' in element.get('class', []):
-                    pronoun = element.get_text()
-                if 'auxgraytxt' in element.get('class', []):
-                    pronoun += " " + element.get_text()
-                if 'verbtxt' in element.get('class', []):
-                    word_constructor = element.get_text()
-                """ Attempt to insert text in dataset. """
-                if 'verbtxt-term' in element.get('class', []):
-                    word_constructor += element.get_text()
-                    try:
-                        verb_dataset[tense].append((pronoun, word_constructor, False))
-                    except KeyError:
-                        return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
-                    word_constructor, pronoun = None, None
-                if 'verbtxt-term-irr' in element.get('class', []):
-                    word_constructor += element.get_text()
-                    try:
-                        verb_dataset[tense].append((pronoun, word_constructor, True))
-                    except KeyError:
-                        return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
-                    word_constructor, pronoun = None, None
+            try:
+                if element.name:   # All HTML tags have name attributes.
+                    if "blue-box-wrap" in element.get('class', []) and element.get('mobile-tile', []) is not None:
+                        tense = element["mobile-title"].strip()
+                        verb_dataset[tense] = []
+                    if 'graytxt' in element.get('class', []):
+                        pronoun = element.get_text()
+                    if 'auxgraytxt' in element.get('class', []):
+                        pronoun += " " + element.get_text()
+                    if 'verbtxt' in element.get('class', []):
+                        word_constructor = element.get_text()
+                    """ Attempt to insert text in dataset. """
+                    if 'verbtxt-term' in element.get('class', []):
+                        if word_constructor:
+                            word_constructor += element.get_text()
+                        else:
+                            word_constructor = element.get_text()
+                        try:
+                            verb_dataset[tense].append((pronoun, word_constructor, False))
+                        except KeyError:
+                            return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
+                        word_constructor, pronoun = None, None
+                    if 'verbtxt-term-irr' in element.get('class', []):
+                        if word_constructor:
+                            word_constructor += element.get_text()
+                        else:
+                            word_constructor = element.get_text()
+                        try:
+                            verb_dataset[tense].append((pronoun, word_constructor, True))
+                        except KeyError:
+                            return f"KeyError: TENSE WAS NOT FOUND, UNABLE TO INSERT WORD INTO DATABASE. \nDEBUG INFO: \nPronoun attempted to be inserted: {pronoun} \nWord attempted to be inserted: {word_constructor}"
+                        word_constructor, pronoun = None, None
+            except Exception as e:
+                print(f"ERROR EXTRACTING TEXT FROM HTML: {e} \n DEBUG INFO: element is '{e}'")
         return self.global_dataset
     
     def parse(self):
         bs = self.get_html(url=self.url)
         return self.extract_text_from_tags(bs)
+
+
