@@ -1,12 +1,14 @@
 import unittest
 from bs4 import BeautifulSoup
 from mysql.connector import errorcode
-
 from scraper import Scraper
 from sample_html import html_dict
 from db_populator import Database
 import MySQL_connection
+import create_db
 from sample_dataset import dataset_dict
+import PT_Conjugation_Database
+import argparse
 
 # FIXME: create_db moved to create_db.py
 # TODO: Test that create_db error raised actually drops the database.
@@ -174,8 +176,9 @@ class TestDatabaseConnection(unittest.TestCase):
             }
         self.connection = MySQL_connection.connect_to_mysql_server(connection_args)
         self.assertIsNone(self.connection)
-        
-class TestDatabaseStorage(unittest.TestCase):
+
+class TestDatabaseInteracitons(unittest.TestCase):
+    # FIXME: all failing due to self.cursor = self.connection.cursor() being None
     """
     Test for storage in the chosen MySQL database using dp_populator.populate_db.
     """
@@ -184,15 +187,16 @@ class TestDatabaseStorage(unittest.TestCase):
         Create a test database that does not share a name with an already existing database.
         """
         self.connection = MySQL_connection.connect_to_mysql_server()
-        self.cursor = self.connection.cursor()
-        self.test_db_name = "test_db_populator_create_db"
-    
-        self.cursor.execute("SHOW DATABASES")
-        databases = [database[0] for database in self.cursor.fetchall()]
-        if self.test_db_name in databases:
-            raise Exception(f"ERROR: Database '{self.test_db_name}' already exists. Aborting tests to prevent accidental data loss.")
-        self.obj = Database(connection=self.connection, dataset="", create_new_db=True)
-        self.obj.create_db(db_name=self.test_db_name)
+        if self.connection is not None:
+            self.cursor = self.connection.cursor()
+            self.test_db_name = "test_db_populator_create_db"
+            self.cursor.execute("SHOW DATABASES")
+            databases = [database[0] for database in self.cursor.fetchall()]
+            if self.test_db_name in databases:
+                raise Exception(f"ERROR: Database '{self.test_db_name}' already exists. Aborting tests to prevent accidental data loss.")
+            create_db.create_db(db_name=self.test_db_name, connection=self.connection)
+        else:
+            raise "Error connecting to MySQL server with MySQL_connection.connect_to_mysql_server()."
    
     def tearDown(self):
         """
@@ -229,24 +233,85 @@ class TestDatabaseStorage(unittest.TestCase):
         """
         # TODO
         pass
-
     
+    def test_create_db_is_unique_name(self):
+         """
+        Test to see if error is raised when requesting to create a new database with an input database name that already exists in the server.
+        """
+         with self.assertRaises(ValueError):
+                PT_Conjugation_Database.is_unique_name(self.test_db_name, create_new_databse="Y")
+
+    def test_add_to_existing_db_is_unique_name(self):
+        """
+        Test to see if error is raised when requesting to add to an existing database with an input database name that does not exist in the server.
+        """
+        doesnt_exist_test_db_name="This_name_doesnt_exist"
+        self.cursor.execute("SHOW DATABASES")
+        databases = [database[0] for database in self.cursor.fetchall()]
+        if doesnt_exist_test_db_name in databases:
+            raise Exception(f"ERROR: Database '{doesnt_exist_test_db_name}' exists so test will fail. Please change the test name: '{doesnt_exist_test_db_name}' to fix this test.")
+        with self.assertRaises(ValueError):
+            PT_Conjugation_Database.is_unique_name(doesnt_exist_test_db_name, create_new_databse="N")
+
+        
+
     def test_single_row_insertion(self):
         """
         A test to see if data is correctly accepted and stored in the appropriate tables. 
         """
-        dataset = dataset_dict["single_verb"]
-        self.obj.dataset = dataset
-        # print(self.obj.data)
-        self.obj.store_row(data=self.obj.data)
-        # TODO: populate these tables.
-        # self.cursor.execute("SELECT * FROM verb")
-        # self.cursor.execute("SELECT * FROM pronoun")
-        # self.cursor.execute("SELECT * FROM tense")
-        self.cursor.execute("SELECT * FROM conjugation")
-        rows = [row for row in self.cursor.fetchall()]
-        print("rows: ", rows)
+        # #FIXME: create Database object.
+        # dataset = dataset_dict["single_verb"]
+        # self.obj.dataset = dataset
+        # # print(self.obj.data)
+        # self.obj.store_row(data=self.obj.data)
+        # # TODO: populate these tables.
+        # # self.cursor.execute("SELECT * FROM verb")
+        # # self.cursor.execute("SELECT * FROM pronoun")
+        # # self.cursor.execute("SELECT * FROM tense")
+        # self.cursor.execute("SELECT * FROM conjugation")
+        # rows = [row for row in self.cursor.fetchall()]
+        # print("rows: ", rows)
+        # TODO
+        pass
 
+class TestMain(unittest.TestCase):
+    def test_verb_input(self):
+        input = "Poder"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["poder"])
+        input = "Poder,"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["poder"])
+        input = "PODER"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["poder"])
+        
+    def test_verbs_input(self):
+        input = "Estar, Ser, Ter, Fazer, Ver, Vir"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["estar", "ser", "ter", "fazer", "ver", "vir"])
+        input = "Estar Ser Ter Fazer Ver Vir"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["estar", "ser", "ter", "fazer", "ver", "vir"])
+        input = "ESTAR, SER, TER, FAZER, VER, VIR"
+        self.assertEqual(PT_Conjugation_Database.input_type(input), ["estar", "ser", "ter", "fazer", "ver", "vir"])
+
+    def test_valid_db_name(self):
+        """
+        A test for valid database name inputs.
+        """
+        self.assertEqual(PT_Conjugation_Database.validate_db_name("A_valid_db_name", ""), "A_valid_db_name")
+        self.assertEqual(PT_Conjugation_Database.validate_db_name("underscores_allowed", ""), "underscores_allowed")
+        self.assertEqual(PT_Conjugation_Database.validate_db_name("numb3rs4ll0w3d", ""), "numb3rs4ll0w3d")
+        
+    def test_invalid_db_name(self):
+        """
+        A test for raising the correct error for invalid database name inputs.
+        """
+        with self.assertRaises(argparse.ArgumentTypeError):
+            PT_Conjugation_Database.validate_db_name("----", "")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            PT_Conjugation_Database.validate_db_name("wrong!!!", "")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            PT_Conjugation_Database.validate_db_name(" ", "")    
+        with self.assertRaises(argparse.ArgumentTypeError):
+            PT_Conjugation_Database.validate_db_name("no spaces allowed ", "")    
+        
 if __name__ == '__main__':
     unittest.main()
 
