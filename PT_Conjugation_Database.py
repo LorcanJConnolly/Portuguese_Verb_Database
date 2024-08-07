@@ -46,9 +46,9 @@ def is_unique_name(name, create_new_databse):
     databases = [database[0] for database in cursor.fetchall()]
     cursor.close()
     connection.close()
-    if name in databases and create_new_databse == "Y":
+    if name in databases and create_new_databse == "y":
         raise ValueError(f"Database name: '{name}' already exists in the database. Please choose another name.")
-    if name not in databases and create_new_databse == "N":
+    if name not in databases and create_new_databse == "n":
         raise ValueError(f"Database name: '{name}' does not exist in the database. Please choose another name from: {databases}.")
     return True
 
@@ -70,7 +70,6 @@ if __name__ == '__main__':
     """
     CLI inputs.
     """
-    print(validate_db_name("test", "Y"))
     # python [file.py] [verbs] [database name] [create new database] // [JSON file name] [Create new JSON file]
     parser = argparse.ArgumentParser(description="Scrape verb webpage(s) and insert data into a MySQL database.")
     parser.add_argument("verbs", type=input_type, help="Input the verb(s) with a whitespace delimiter or the directory of an excel file containing only a list of verbs.")   # args.verbs
@@ -79,14 +78,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     try:
-        validate_db_name(args.database_name, args.create_new_databse)
+        validate_db_name(args.database_name, args.create_new_databse.lower())
     except Exception as e:
         print(e)
 
-    print(args)
-
+    # FIXME: args.create_new_databse.lower()
     connection = MySQL_connection.connect_to_mysql_server() 
-    if args.create_new_databse == "Y":
+    if args.create_new_databse.lower() == "y":
         create_db(args.database_name, connection)
     
     dataset = {}
