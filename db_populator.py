@@ -18,7 +18,7 @@ class Database:
         """
         self.cursor.execute(f"USE {self.db_name}")
         # Insert the root Verb into Verb table to generated a Primary Key.
-        self.cursor.execute("INSERT IGNORE INTO Verb (Verb) VALUES (%s)", (verb,))
+        self.cursor.execute("INSERT INTO Verb (Verb) VALUES (%s)", (verb,))
         self.connection.commit()
 
     def store_row(self, verb, tense, pronoun, conjugation, irregular):
