@@ -11,15 +11,17 @@ class Database:
         self.verb = verb
         self.global_dataset = global_dataset
         self.db_name = db_name
+        self.verb_id_counter = 1
 
-    def store_verb(self, verb):
+    def store_verb(self, verb, verb_id_counter):
         """
-        Stores a new root verb into the Verb table to generate its key.
+        Stores a new root verb into the Verb table using a manually handled id.
         """
         self.cursor.execute(f"USE {self.db_name}")
         # Insert the root Verb into Verb table to generated a Primary Key.
-        self.cursor.execute("INSERT INTO Verb (Verb) VALUES (%s)", (verb,))
+        self.cursor.execute("INSERT INTO Verb (Verb) VALUES (%s, %s)", (verb_id_counter, verb))
         self.connection.commit()
+        self.verb_id_counter += 1 
 
     def store_row(self, verb, tense, pronoun, conjugation, irregular):
         """
@@ -31,7 +33,7 @@ class Database:
         self.cursor.execute("SELECT id FROM Verb WHERE Verb = %s", (verb,))
         verb_id = self.cursor.fetchone()
         if verb_id is None:
-            raise ValueError(f"Verb '{verb}' does not exist in the Pronoun table")
+            raise ValueError(f"Verb '{verb}' does not exist in the Verb table")
         verb_id = verb_id[0]
 
         self.cursor.execute("SELECT id FROM Pronoun WHERE Pronoun = %s", (pronoun,))
@@ -48,7 +50,20 @@ class Database:
         
         self.cursor.execute("INSERT INTO Conjugation (Verb, Tense, Pronoun, Conjugation, Irregular) VALUES (%s, %s, %s, %s, %s)", (verb_id, tense_id, pronoun_id, conjugation, irregular))
         self.connection.commit()
-        
+    
+    def remove_verb(self, verb):
+        """
+        Remove verb from verb table and conjugaiton table in the case of when there is an error trying to insert the verb row into tables.
+        """
+        self.cursor.execute(f"USE {self.db_name}")
+        self.cursor.execute("SELECT id FROM Verb WHERE Verb = %s", (verb,))
+        verb_id = self.cursor.fetchone()[0]
+        self.cursor.execute("DELETE FROM Verb WHERE id = %s", (verb_id,))
+        self.connection.commit()
+        self.cursor.execute("DELETE FROM Conjugation WHERE Verb = %s", (verb_id,))
+        self.connection.commit()
+
+
     def populate_db(self, dataset, verb):
         """
         Iterates over the dataset and compares the structure and data to the expected values using structure_dict from dataset_structure.
@@ -57,6 +72,7 @@ class Database:
         # TODO: test the new added error raising
         # TODO: test that this inputs a single verb correctly
         try:
+            self.store_verb(verb, self.verb_id_counter)
             for tense in dataset[verb]:
                 if tense not in structure_dict:
                     errors[verb] = f"ERROR: Extracted tense: {tense} is not recognised."
@@ -75,9 +91,10 @@ class Database:
                         errors[verb] = f"ERROR: expected pronoun '{expected_pronoun}' != given pronoun '{pronoun}' in tesnse: {tense}."
                         raise ValueError("Errors whilst inserting into database:", errors)
                     else:
-                        self.store_verb(verb)
                         self.store_row(verb, tense, pronoun, conjugation, irregular)
         except ValueError as ve:
             print("Exception:", str(ve))
+            # DROP VERB
+            # FIXME: handle the id being continuous even after removing a verb.
             
     
