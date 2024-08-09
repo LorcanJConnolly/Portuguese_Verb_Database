@@ -19,10 +19,10 @@ from string import punctuation
 
 def input_type(input):
     """ Checks if Verbs are manually inputted as a list or are to be extracted from an Excel spreadsheet. """
-    if os.path.isfile(input) and os.path.splitext(input)[1] == ".xlsx" or os.path.splitext(input)[1] == ".xls":
-        return excel_to_list.extract()
+    if os.path.isfile(input) and os.path.splitext(input)[1] in [".xlsx", ".xls"]:
+        return excel_to_list.extract(input)
     else:
-        return input
+        return input.split()
         #FIXME output cant be a list
         # return [verb.strip().strip(punctuation).lower() for verb in input.split()]
 
@@ -89,9 +89,9 @@ if __name__ == '__main__':
         create_db(args.database_name, connection)
     
     dataset = {}
-    print("args.verb: ", args.verbs)
-    for verb in args.verbs: 
-        print("verb: ", verb)
+    print("The input Verbs:", args.verbs)
+    # TRY EXCEPT here for deleteing the database.
+    for verb in args.verbs[0]:  # args.verbs returns a list of inputs which are a list of verb(s).
         if not exist_in_database(connection, verb, args.database_name):
             print("Scraping the verb: ", verb)
             url = f"https://conjugator.reverso.net/conjugation-portuguese-verb-{verb}.html"
