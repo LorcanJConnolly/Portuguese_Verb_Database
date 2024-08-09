@@ -42,19 +42,18 @@ def create_db(db_name, connection):
                         FOREIGN KEY (Pronoun) REFERENCES Pronoun(id))
                         """) 
             connection.commit()
-            cursor.execute("INSERT IGNORE INTO Pronoun (Pronoun) VALUES (NULL)")   # Insert a Null ID reference for conguations without pronouns.
 
             """ Populated Key Tables. """
+            inserted_pronouns = {}
             for tense, pronouns in structure_dict.items():
                 cursor.execute("INSERT INTO Tense (Tense) VALUES (%s)", (tense,))
                 connection.commit()
-                if pronouns is not None:
-                    for pronoun in pronouns:
-                        cursor.execute("INSERT IGNORE INTO Pronoun (Pronoun) VALUES (%s)", (pronoun,))   # Ignore duplicates.
+                for pronoun in pronouns:
+                    if pronoun not in inserted_pronouns:
+                        cursor.execute("INSERT INTO Pronoun (Pronoun) VALUES (%s)", (pronoun,))   # Ignore duplicates.
                         connection.commit()
+                        inserted_pronouns[pronoun] = True
 
         except mysql.connector.Error as error:
-            print(f"ERROR CREATING DATABASE\nDEBUG INFO\nError number: {error.errno}\nError message: {error.msg}")
-            # if it exists in the database
+            print(f"ERROR CREATING DATABASE\n---DEBUG INFO:\n------Error number: {error.errno}\n------Error message: {error.msg}")
             cursor.execute(f"DROP DATABASE IF EXISTS {db_name}")
-    
