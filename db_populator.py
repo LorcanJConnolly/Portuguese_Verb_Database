@@ -62,6 +62,7 @@ class Database:
         self.connection.commit()
         self.cursor.execute("DELETE FROM Conjugation WHERE Verb = %s", (verb_id,))
         self.connection.commit()
+        self.verb_id_counter -= 1 
 
 
     def populate_db(self, dataset, verb):
@@ -69,8 +70,6 @@ class Database:
         Iterates over the dataset and compares the structure and data to the expected values using structure_dict from dataset_structure.
         """
         errors = {}   # Dictionary contains {Verb that triggered error : Error reason}.
-        # TODO: test the new added error raising
-        # TODO: test that this inputs a single verb correctly
         try:
             self.store_verb(verb, self.verb_id_counter)
             for tense in dataset[verb]:
@@ -94,7 +93,6 @@ class Database:
                         self.store_row(verb, tense, pronoun, conjugation, irregular)
         except ValueError as ve:
             print("Exception:", str(ve))
-            # DROP VERB
-            # FIXME: handle the id being continuous even after removing a verb.
+            self.remove_verb(verb)
             
     
