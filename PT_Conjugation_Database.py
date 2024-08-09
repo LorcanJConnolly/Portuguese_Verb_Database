@@ -18,8 +18,9 @@ from string import punctuation
 # TODO: Add a way of removing a verb and its data from the database incase of wrong entry.
 
 def input_type(input):
+    """ Checks if Verbs are manually inputted as a list or are to be extracted from an Excel spreadsheet. """
     if os.path.isfile(input) and os.path.splitext(input)[1] == ".xlsx" or os.path.splitext(input)[1] == ".xls":
-        excel_to_list.extract()
+        return excel_to_list.extract()
     else:
         return input
         #FIXME output cant be a list
