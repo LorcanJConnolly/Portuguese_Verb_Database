@@ -33,7 +33,7 @@ def validate_db_name(name, create_new_databse):
         else:
             raise ValueError(is_unique_name(name, create_new_databse))
     else:
-        raise argparse.ArgumentTypeError(f"Invalid database name '{name}'. Must contain only alphanumeric characters and underscores, with no spaces.")
+        raise argparse.ArgumentTypeError(f"\nERROR: Invalid database name '{name}'.\n   Database name must contain only alphanumeric characters and underscores, with no spaces.\n")
 
 def is_unique_name(name, create_new_databse):
     """ 
@@ -47,9 +47,9 @@ def is_unique_name(name, create_new_databse):
     cursor.close()
     connection.close()
     if name in databases and create_new_databse == "y":
-        raise ValueError(f"Database name: '{name}' already exists in the database. Please choose another name.")
+        raise ValueError(f"\nERROR: Database name: '{name}' already exists in the database.\n   Please choose another name NOT from: {databases}.\n")
     if name not in databases and create_new_databse == "n":
-        raise ValueError(f"Database name: '{name}' does not exist in the database. Please choose another name from: {databases}.")
+        raise ValueError(f"\nERROR: Database name: '{name}' does not exist in the database.\n   Please choose another name from: {databases}.\n")
     return True
 
 def exist_in_database(connection, verb, db_name):
@@ -102,7 +102,7 @@ if __name__ == '__main__':
             populator = Database(connection=connection, db_name=args.database_name, verb=verb, global_dataset=dataset)
             populator.populate_db(dataset, verb)
         else:
-            print(f"Skpping the verb: '{verb}' as it already exists in the database.")
+            print(f"\nERROR: Verb exists in database. \n  Skpping the verb: '{verb}'.\n")
 
     # Once done we extract to JSON file.
 
